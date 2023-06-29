@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import WebView, { WebViewProps } from 'react-native-webview';
 import { TendamSpinner } from '../spinner/TendamSpinner';
-
 interface ITendamWebViewProps extends WebViewProps {
   urlSource: string;
   enableSpinner?: boolean;
@@ -10,6 +9,15 @@ interface ITendamWebViewProps extends WebViewProps {
 
 export const TendamWebView = ({ urlSource, enableSpinner }: ITendamWebViewProps): JSX.Element => {
   const [isWebviewLoading, setIsWebviewLoading] = useState(false);
+
+  const handleOnLoadProgress = (event) => {
+    if ((Platform.OS === 'android' && event.nativeEvent.progress < 0.6) ||
+      (Platform.OS === 'ios' && event.nativeEvent.progress < 0.7)) {
+        setIsWebviewLoading(true);
+      } else {
+        setIsWebviewLoading(false);
+    }
+  };
 
   return (
     <View style={styles.webViewContainer}>
@@ -24,8 +32,7 @@ export const TendamWebView = ({ urlSource, enableSpinner }: ITendamWebViewProps)
         thirdPartyCookiesEnabled
         sharedCookiesEnabled
         startInLoadingState
-        onLoadStart={() => setIsWebviewLoading(true)}
-        onLoad={() => setIsWebviewLoading(false)}
+        onLoadProgress={handleOnLoadProgress}
       />
       {enableSpinner && isWebviewLoading ? <TendamSpinner /> : null}
     </View>
